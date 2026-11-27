@@ -1,0 +1,4 @@
+node_modules/
+.profile/
+.session.json
+*.log

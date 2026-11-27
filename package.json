@@ -1,0 +1,16 @@
+{
+  "name": "openlib-telkom-scraper",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node scraper.js",
+    "discover": "node scraper.js --discover",
+    "login": "node scraper.js --login",
+    "install-browsers": "npx playwright install chromium",
+    "reset-profile": "node -e \"require('fs').rmSync('.profile',{recursive:true,force:true});require('fs').rmSync('.session.json',{force:true});console.log('profile + sesi dihapus')\""
+  },
+  "dependencies": {
+    "playwright": "^1.49.0"
+  }
+}

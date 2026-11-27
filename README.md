@@ -1,0 +1,152 @@
+# OpenLib Telkom Scraper — Bab 1, 2 & 3 (Lokal)
+
+Script ini jalan **di komputer kamu**. Kamu yang login SSO, dan kredensial tidak pernah keluar dari mesin ini.
+
+## Alur otomatis
+
+1. Browser Chromium terbuka → kamu login SSO sekali (MFA/OTP boleh).
+2. Script **mendeteksi login otomatis**, lalu lanjut sendiri:
+   - buka `Catalog`
+   - klik **Advanced**
+   - isi **Penerbit = "Kampus Jakarta"**
+   - telusuri **semua halaman hasil** (filter tetap terbawa via session)
+   - buka tiap detail dokumen, ambil **BAB 1**, **BAB 2**, dan **BAB 3**
+   - download PDF-nya ke folder tujuan
+3. Login disimpan di profil lokal `.profile/`, jadi run berikutnya tidak perlu login lagi (sampai sesi kedaluwarsa).
+
+## Headless (tanpa jendela browser)
+
+Default sekarang **headless**. Kalau sesi login sudah tersimpan, tidak ada jendela sama sekali.
+
+Kalau belum ada sesi / sesi kedaluwarsa, script membuka jendela **sekali** untuk login SSO, lalu menutupnya sendiri dan lanjut headless.
+
+Mau login duluan tanpa mengunduh apa pun (biar run berikutnya benar-benar tanpa jendela):
+
+```bash
+npm run login
+```
+
+Balik ke mode berjendela penuh (misal untuk debugging):
+
+```bash
+npm start -- --headed
+```
+
+## Cara pakai
+
+```bash
+cd openlib-scraper
+npm install
+npm run install-browsers
+npm run start
+```
+
+Login di browser yang muncul. Setelah itu semua berjalan otomatis.
+
+## Pilih jenis berkas (bab, lembar, dll.)
+
+Script tidak lagi terkunci ke Bab 1 & 2. Langkah 1: cari dulu semua jenis berkas yang tersedia (tanpa login):
+
+```bash
+npm run discover
+```
+
+Hasilnya ada di `openlib-download/_available.md` dan `_catalog.json`. Pemindaian bersifat incremental: dokumen yang sudah ada di cache tidak dikunjungi ulang, jadi run berikutnya hanya memproses dokumen baru. Pakai `npm run discover -- --full` untuk memindai ulang semua.
+
+Langkah 2: jalankan `npm start`, script akan menampilkan daftar bernomor dan bertanya mau ambil yang mana:
+
+```
+Pilih (contoh: 16,17 | 16-21 | bab3,bab4 | all):
+```
+
+Atau langsung lewat argumen (tanpa tanya):
+
+```powershell
+npm start -- --types bab3,bab4
+npm start -- --types all
+npm start -- --types 16-21 --from 1 --to 20
+```
+
+Catatan: berkas yang berformat Word (`.docx`) tidak bisa diunduh sebagai PDF dan akan tercatat sebagai gagal. Berkas BAB, cover, dll. yang bertanda "Perlu Login" hanya bisa diunduh setelah `npm run login`.
+
+## Output
+
+Default: `%USERPROFILE%\openlib-download` — mis. `C:\Users\Sena\openlib-download`.
+
+Mau folder lain? Pakai `--out "D:\openlib-download"` (lihat tabel opsi CLI).
+
+```
+openlib-download/
+├── _index.md              # daftar semua dokumen + link PDF
+├── _manifest.json         # status per dokumen (untuk resume)
+├── 253999_pengembangan-aplikasi-manajemen-distribusi-tiket/
+│   ├── 26.04.5045_bab1.pdf
+│   ├── 26.04.5045_bab2.pdf
+│   └── metadata.md
+└── ...
+```
+
+Kalau script dihentikan di tengah jalan, jalankan lagi — dokumen yang sudah lengkap otomatis dilewati (resume).
+
+## Pause & lanjut di urutan tertentu
+
+Urutan dokumen **disimpan permanen** di `_order.json` (dibuat dari hasil crawl pertama), jadi nomor urut tidak berubah antar-run.
+
+```powershell
+# Mulai dari urutan 51 sampai 100
+npm start -- --from 51 --to 100
+
+# Lanjut dari urutan 101 sampai habis
+npm start -- --from 101
+
+# Proses 20 item mulai urutan 51
+npm start -- --from 51 --items 20
+```
+
+**Pause:** tekan `Ctrl+C` sekali. Script menyelesaikan item yang sedang berjalan, menyimpan manifest, lalu menampilkan nomor lanjutannya:
+
+```
+[PAUSE] Berhenti di urutan 73 dari 297.
+[PAUSE] Lanjut nanti dengan perintah:
+        npm start -- --from 74
+```
+
+**Cek posisi tanpa mengunduh:** angka urutan ada di kolom `No` pada `_index.md`, dan total ada di `_order.json`.
+
+**Kalau daftar di situs berubah** (ada koleksi baru), crawl ulang urutannya:
+
+```powershell
+npm start -- --refresh --from 1
+```
+
+## Opsi CLI
+
+| Argumen | Default | Fungsi |
+|---|---|---|
+| `--from N` | `1` | mulai dari urutan ke-N (1-based) |
+| `--to N` | akhir | berhenti di urutan ke-N |
+| `--items N` | semua | batasi jumlah item yang diproses |
+| `--pages N` | semua | batasi halaman listing saat crawl |
+| `--publisher "..."` | `Kampus Jakarta` | nilai filter Penerbit |
+| `--out "D:\path"` | otomatis (lihat bagian Output) | folder output |
+| `--delay 400` | `400` | jeda antar request (ms) |
+| `--refresh` | – | crawl ulang daftar, abaikan `_order.json` |
+| `--headless` | aktif | jalankan tanpa jendela browser (default) |
+| `--headed` | – | paksa pakai jendela browser |
+| `--login` | – | login saja lalu keluar (simpan sesi) |
+
+Semua opsi juga bisa lewat environment variable (`OPENLIB_FROM`, `OPENLIB_TO`, `OPENLIB_MAX_ITEMS`, `OPENLIB_MAX_PAGES`, `OPENLIB_PUBLISHER`, `OPENLIB_OUT`, `OPENLIB_DELAY_MS`, `OPENLIB_REFRESH`, `OPENLIB_HEADLESS`, `OPENLIB_HEADED`, `OPENLIB_LOGIN`).
+
+## Catatan teknis
+
+- Link Bab 1/2 di halaman detail berbentuk `/pustaka/files/{id}/bab1/...pdf`, yang di server di-redirect ke halaman flipbook.
+- Halaman flipbook menyimpan URL PDF asli di JS (`pdfUrl: "/open/index.php/download/flippingbook_url_download/..."`).
+- Script mengambil URL itu lalu fetch dari dalam halaman (membawa cookie sesi), jadi hasilnya PDF asli, bukan screenshot viewer.
+- Nama file mengikuti nama asli dari server (mis. `26.04.5045_bab1.pdf`).
+
+## Keamanan
+
+- Tidak ada username/password/token yang dikirim ke mana pun.
+- `.profile/` hanya berisi cookie sesi lokal, sudah masuk `.gitignore`.
+- Hapus sesi kapan saja: `npm run reset-profile`.
+- Gunakan hanya untuk keperluan yang diizinkan oleh kebijakan kampus.
