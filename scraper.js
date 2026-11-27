@@ -66,11 +66,11 @@ const HEADLESS = boolPick('headless', 'OPENLIB_HEADLESS', true) && !boolPick('he
 // Hanya login (simpan sesi) lalu keluar. Selalu pakai jendela biar bisa SSO/MFA.
 const LOGIN_ONLY = boolPick('login', 'OPENLIB_LOGIN', false);
 
-// Jenis berkas yang diambil: --types "bab3,bab4" | "16,17" (nomor dari daftar) | "16-21" | "all".
+// Jenis berkas yang diambil: --types "bab4,bab5" | "16,17" (nomor dari daftar) | "16-21" | "all".
 // Kosong = tampilkan daftar dan tanya (kalau dijalankan di terminal).
 const TYPES_ARG = pick('types', 'OPENLIB_TYPES', '');
 // Dipakai saat tidak ada --types dan tidak ada terminal interaktif.
-const DEFAULT_TYPES = ['bab1', 'bab2', 'bab3'];
+const DEFAULT_TYPES = ['bab1', 'bab2', 'bab3', 'bab4', 'bab5'];
 // Scan semua jenis berkas yang tersedia di situs -> _catalog.json, lalu berhenti (tanpa login).
 const DISCOVER_ONLY = boolPick('discover', 'OPENLIB_DISCOVER', false);
 // --full: pindai ulang semua dokumen, abaikan cache _catalog.json.
@@ -906,7 +906,7 @@ async function openAuthenticatedContext() {
 
 async function main() {
   log('==============================================================');
-  log(' OPENLIB TELKOM — AUTO SCRAPER BAB 1, 2 & 3');
+  log(' OPENLIB TELKOM — AUTO SCRAPER BAB 1, 2, 3, 4 & 5');
   log('==============================================================');
   log(`Penerbit : ${PUBLISHER}`);
   log(`Output   : ${DOWNLOAD_DIR}`);
