@@ -71,7 +71,7 @@ Catatan: berkas yang berformat Word (`.docx`) tidak bisa diunduh sebagai PDF dan
 
 ## Output
 
-Default: `%USERPROFILE%\openlib-download` — mis. `C:\Users\Sena\openlib-download`.
+Default: `%USERPROFILE%\openlib-download` — mis. `<folder-user>\openlib-download`.
 
 Mau folder lain? Pakai `--out "D:\openlib-download"` (lihat tabel opsi CLI).
 
