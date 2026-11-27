@@ -1,4 +1,4 @@
-# OpenLib Telkom Scraper — Bab 1, 2 & 3 (Lokal)
+# OpenLib Telkom Scraper — Bab 1, 2, 3, 4 & 5 (Lokal)
 
 Script ini jalan **di komputer kamu**. Kamu yang login SSO, dan kredensial tidak pernah keluar dari mesin ini.
 
@@ -10,7 +10,7 @@ Script ini jalan **di komputer kamu**. Kamu yang login SSO, dan kredensial tidak
    - klik **Advanced**
    - isi **Penerbit = "Kampus Jakarta"**
    - telusuri **semua halaman hasil** (filter tetap terbawa via session)
-   - buka tiap detail dokumen, ambil **BAB 1**, **BAB 2**, dan **BAB 3**
+   - buka tiap detail dokumen, ambil **BAB 1**, **BAB 2**, **BAB 3**, **BAB 4**, dan **BAB 5**
    - download PDF-nya ke folder tujuan
 3. Login disimpan di profil lokal `.profile/`, jadi run berikutnya tidak perlu login lagi (sampai sesi kedaluwarsa).
 
@@ -45,7 +45,7 @@ Login di browser yang muncul. Setelah itu semua berjalan otomatis.
 
 ## Pilih jenis berkas (bab, lembar, dll.)
 
-Script tidak lagi terkunci ke Bab 1 & 2. Langkah 1: cari dulu semua jenis berkas yang tersedia (tanpa login):
+Default-nya adalah Bab 1–5, tapi script tidak terkunci ke situ — bisa pilih jenis berkas lain. Langkah 1: cari dulu semua jenis berkas yang tersedia (tanpa login):
 
 ```bash
 npm run discover
@@ -62,10 +62,12 @@ Pilih (contoh: 16,17 | 16-21 | bab3,bab4 | all):
 Atau langsung lewat argumen (tanpa tanya):
 
 ```powershell
-npm start -- --types bab3,bab4
+npm start -- --types bab4,bab5
 npm start -- --types all
 npm start -- --types 16-21 --from 1 --to 20
 ```
+
+Tanpa `--types` dan tanpa terminal interaktif, yang diambil adalah `bab1,bab2,bab3,bab4,bab5`. Kalau salah satu jenis tidak tersedia di dokumen, script hanya mencatat `[MISS]` dan tetap melanjutkan yang lain.
 
 Catatan: berkas yang berformat Word (`.docx`) tidak bisa diunduh sebagai PDF dan akan tercatat sebagai gagal. Berkas BAB, cover, dll. yang bertanda "Perlu Login" hanya bisa diunduh setelah `npm run login`.
 
@@ -82,6 +84,9 @@ openlib-download/
 ├── 253999_pengembangan-aplikasi-manajemen-distribusi-tiket/
 │   ├── 26.04.5045_bab1.pdf
 │   ├── 26.04.5045_bab2.pdf
+│   ├── 26.04.5045_bab3.pdf
+│   ├── 26.04.5045_bab4.pdf
+│   ├── 26.04.5045_bab5.pdf
 │   └── metadata.md
 └── ...
 ```
@@ -139,7 +144,7 @@ Semua opsi juga bisa lewat environment variable (`OPENLIB_FROM`, `OPENLIB_TO`, `
 
 ## Catatan teknis
 
-- Link Bab 1/2 di halaman detail berbentuk `/pustaka/files/{id}/bab1/...pdf`, yang di server di-redirect ke halaman flipbook.
+- Link Bab 1–5 di halaman detail berbentuk `/pustaka/files/{id}/bab1/...pdf` (polanya sama untuk `bab2`, `bab3`, `bab4`, `bab5`), yang di server di-redirect ke halaman flipbook.
 - Halaman flipbook menyimpan URL PDF asli di JS (`pdfUrl: "/open/index.php/download/flippingbook_url_download/..."`).
 - Script mengambil URL itu lalu fetch dari dalam halaman (membawa cookie sesi), jadi hasilnya PDF asli, bukan screenshot viewer.
 - Nama file mengikuti nama asli dari server (mis. `26.04.5045_bab1.pdf`).
